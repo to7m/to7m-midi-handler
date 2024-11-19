@@ -1,0 +1,10 @@
+#!/bin/relative-path .venv_for_python3.9.17/bin/python
+
+
+from src import to7m_exec, logging, run_tmh
+
+
+to7m_exec.ALL_CODE = True
+logging.ALLOW_RESTART = False
+
+run_tmh()

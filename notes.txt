@@ -1,0 +1,74 @@
+COMPILABILITY:
+    _io should be initialised first
+    then controllers_profiles and sound_modules_profiles
+    then _core
+
+    turn this into diagram
+
+
+TMHM recording:
+    By default include all lsmp and lcp states, but have other options for just one controller etc.
+    Figure out time sync.
+    lcp_i translation on playback: create new lcps so playback is done by headless lcp by default
+
+
+
+closed patch
+active patch
+potential patch
+
+top 8 buttons: shortcuts for given patch changes, depending on a list of patch sets:
+[
+    (
+        (1, 2),  # key, in case of unexpected song
+        [(1, 2, 3), None, None, None, None, None, None, None]  # patch numbers for shortcuts
+    ),
+]
+
+glossary: active patch slot
+
+
+
+move all msgs and handlers into correct place
+
+
+
+I think the way to tdo this derirdings things i sto record everything including the prerecorded stuff already playing, but then go back to the resultings fule and strip those parts out of it, but measure their relative offsets to the origisnal file and find the mediam dfferemce. then put then back in
+
+LCP 0 should be for recorded only
+when recording, LCP should be stored for the tmp file, but then after recording is complete, the recordings manager should separate the lcp0 stream and adjust the timestamps based on median diff. then combine with other streams removing LCP information
+
+
+
+msg flow:
+lcp sends using either send_to_core_global or send_to_core_for_pslot callable
+callable created by connection manager, wrap the message in a LcpsToCoreGlobalMsg or LcpToCoreMsg
+
+need a TmhStateMsg for future-proof playback, either:
+  GlobalAndPslotsState (include next recording msg index)
+  or
+  PslotsState
+  depending on what the recording contains
+
+how to handle stop playback during recording? order of events
+
+
+state:
+    (msg_count, all state msgs)
+
+
+
+
+flow:
+
+lcp --> core:
+  StartRecordingMsg()
+  StopRecordingMsg()
+  StartPlaybackMsg()
+  StopPlaybackMsg()
+  IncrementSelectedRecording(increment=1)
+  DeleteRecordingMsg()
+lcp should specify filename stems, because that means the lcp has more control
+
+
+scenes which run entirely on the lcp

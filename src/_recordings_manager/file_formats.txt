@@ -1,0 +1,41 @@
+TMHM = to7m_midi_handler messages
+
+.tmhm_unsaved format:
+    TMHM_VERSION_INT (64-bit)
+
+    ..tmh_msgs.types.to_recordings_manager.GlobalStateMsg(nesteds)
+
+    any number of
+        ..tmh_msgs.types.to_recordings_manager.LcpStateMsg(lcp_i, nesteds)
+
+    ..tmh_msgs.types.to_recordings_manager.PlaybackStateMsg(
+        filename_stem,
+        next_msg_i,
+        playback_is_looped
+    )
+
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(
+            filename_stem,
+            include_globals
+        )
+    )
+
+    any number of timestamped messages
+
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg()
+    )
+
+
+.tmhm format:
+    TMHM_VERSION_INT (64-bit)
+
+    any number of timestamped messages
+
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg()
+    )

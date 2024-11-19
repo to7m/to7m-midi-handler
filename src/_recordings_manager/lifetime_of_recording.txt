@@ -1,0 +1,181 @@
+TO DO: when do messages start recording? recrding manager receives start recording, sends back another msg, then core sends the state as acknowledgement that all future messages will be recorded, so that start_msg_i is correct
+
+
+
+LCP
+    sends
+    ..tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(
+        filename_stem,
+        include_globals
+    )
+    to
+    TmhCore()
+
+This is handled by ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec()
+    which first calls TmhCore().handle_start_recording
+        which sends
+        ..tmh_msgs.types.to_recordings_manager.GlobalStateMsg(nesteds)
+        to RecordingsManager()
+
+        and then sends any number of
+        ..tmh_msgs.types.to_recordings_manager.LcpStateMsg(lcp_i, nesteds)
+        to
+        RecordingsManager()
+
+    and then sends
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns, StartRecordingMsg()
+    )
+    to
+    RecordingsManager()
+
+RecordingsManager()
+    first receives the GlobalStateMsg()
+        and so calls RecordingsManager.handle_global_state
+            which temporarily saves the message
+
+    and then receives any number of LcpStateMsg()
+        and so for each calls RecordingsManager.handle_lcp_state
+            which temporarily saves the message
+
+    and then receives the TimestampedLcpToCoreRecordingsManagerMsg(StartRecordingMsg())
+        and so calls RecordingsManager.handle_start_recording
+            which first stops any ongoing recording
+
+            and then opens a new .tmhm_unsaved file
+
+            and then calls RecordingsManager.write_header
+                which first writes the TMHM_VERSION_INT (64-bit) to the file
+
+                and then writes the state messages
+                including at the end
+                a ..tmh_msgs.types.to_recordings_manager.PlaybackStateMsg(
+                    filename_stem,
+                    next_msg_i,
+                    playback_is_looped
+                )
+                to
+                the file
+
+                and then writes
+                an new but equal TimestampedLcpToCoreRecordingsManagerMsg(
+                    timestamp_ns,
+                    StartRecordingMsg()
+                )
+                to
+                the file
+
+
+LCPs (including the playback LCP 0)
+    send various LcpToCore messages to TmhCore()
+
+Any given instance of these messages is handled by a ..tmh_msgs.handlers.to_core.HandleToCoreSpec subclass instance
+    which first calls the relevant TmhCore() method
+
+    and then wraps the message in the relevant Timestamped class in ..tmh_msgs.types.to_recordings_manager
+
+    and then sends the timestamped message to RecordingsManager()
+
+RecordingsManager()
+    receives the timestamped message
+        and so calls the relevant handle method
+            which writes the timestamped message to the file
+
+
+An LCP
+    sends
+    ..tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg()
+    to
+    TmhCore()
+
+This is handled by ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec()
+    which doesn't call a method
+
+    and then sends
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        StopRecordingMsg()
+    )
+    to
+    RecordingsManager()
+
+RecordingsManager()
+    receives the timestamped StopRecordingMsg()
+        and so calls RecordingsManager.handle_stop_recording
+            which first writes the message to the file
+
+            and then closes the file
+
+            and then calls .save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue=queue)
+
+.save_unsaved.try_save_unsaved_recordings
+    for each path in UNSAVED_DIR
+    calls .save_unsaved.try_save_unsaved_recording(unsaved_path, to_recordings_manager_queue=queue)
+
+.save_unsaved.try_save_unsaved_recording
+    first reads the file and the other recordings the file references and creates a new .tmhm file
+
+    and then if successful
+        sends ..tmh_msgs.types.to_recordings_manager.UpdateRecordingsMsg() to to_recordings_manager_queue
+
+
+LCP
+    sends
+    ..tmh_msgs.types.lcp_to_core_recordings_manager.StartPlaybackMsg(
+        filename_stem,
+        playback_globals,
+        loop
+    )
+    to
+    TmhCore()
+
+This is handled by ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec()
+    which doesn't call a method
+
+    and then sends
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StartPlaybackMsg(
+            filename_stem,
+            playback_globals,
+            loop
+        )
+    )
+    to
+    RecordingsManager()
+
+RecordingsManager()
+    receives the timestamped StartPlaybackMsg()
+        and so calls RecordingsManager.handle_start_playback
+            which first calls RecordingsManager._try_stop_playback
+                which may be documented in the next bit
+
+            and then does some stuff to load and buffer the playback file +...
+
+            and then calls RecordingsManager._try_write_msg_to_file
+
+
+LCP
+    sends
+    ..tmh_msgs.types.lcp_to_core_recordings_manager.StopPlaybackMsg()
+    to
+    TmhCore()
+
+This is handled by ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec()
+    which doesn't call a method
+
+    and then sends
+    ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopPlaybackMsg()
+    )
+    to
+    RecordingsManager()
+
+RecordingsManager()
+    receives the timestamped StopPlaybackMsg()
+        and so calls RecordingsManager.handle_stop_playback
+            which first calls RecordingsManager._try_stop_playback
+                which +...
+
+            and then calls RecordingsManager._try_write_msg_to_file

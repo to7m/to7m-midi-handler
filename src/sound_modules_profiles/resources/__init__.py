@@ -1,0 +1,1 @@
+from .base import UNSORTED_SOUND_MODULES_PROFILE_SPECS

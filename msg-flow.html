@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/generated-css/programmer_portfolio.css?v=!VERSION_STRING">
+  <title>Thomas Howe — Programmer</title>
+
+  <style>
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    li > ul > li > ul {
+        padding-left: 2em;
+    }
+
+    body > ul > li + li {
+        margin-top: 2em;
+    }
+
+    li > ul > li + li {
+        margin-top: 1em;
+    }
+
+    span {
+        background-color: rgb(95%, 95%, 100%);
+        font-style: normal;
+        color: rgb(20%, 0%, 70%);
+    }
+
+    span[title] {
+        background-color: rgb(95%, 100%, 90%);
+        color: rgb(10%, 60%, 0%);
+    }
+  </style>
+    
+  <script>
+    const expanded_defs = {
+        "GlobalStateMsg":
+            "tmh_msgs.types.to_recordings_manager.GlobalStateMsg(nesteds)",
+        "HandleLcpToCoreRecordingsManagerSpec":
+            "tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec()",
+        "HandleLcpToCoreRecordingsManagerSpec.send_playback_state":
+            "tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec().send_playback_state",
+        "HandleToCoreSpec subclass":
+            "tmh_msgs.handlers.to_core.py",
+        "LcpStateMsg":
+            "tmh_msgs.types.to_recordings_manager.LcpStateMsg(nesteds)",
+        "LcpToCore*Msg instance":
+            "tmh_msgs.types.lcp_to_core_{global,pslot,recordings_manager}.py",
+        "PlaybackStateMsg":
+            "tmh_msgs.types.to_recordings_manager.PlaybackStateMsg(filename_stem: str, next_msg_i: int, playback_is_looped: bool)",
+        "StartRecordingMsg":
+            "tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(filename_stem: str, include_globals: bool)",
+        "timestamped LcpToCore*Msg instance":
+            "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCore*Msg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_*.*Msg(*))",
+        "timestamped StartRecordingMsg":
+            "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(filename_stem: str, include_globals: bool))",
+    };
+
+    function add_span_titles() {
+        document.querySelectorAll("span").forEach((span) => {
+            if (span.textContent in expanded_defs) {
+                span.setAttribute("title", expanded_defs[span.textContent]);
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", add_span_titles);
+  </script>
+</head>
+
+<body><ul>
+  <li>
+    <ul>
+      <li>
+        LCP sends <span>StartRecordingMsg</span> to <span>TmhCore</span>
+      </li>
+      <li>
+        This is handled by <span>HandleLcpToCoreRecordingsManagerSpec</span>
+        <ul>
+          <li>
+            which first calls <span>TmhCore.handle_start_recording</span>
+            <ul>
+              <li>
+                which first sends <span>GlobalStateMsg</span> to <span>RecordingsManager</span>
+              </li>
+              <li>
+                and then sends any number of <span>LcpStateMsg</span> to <span>RecordingsManager</span>
+              </li>
+              <li>
+                and then calls <span>HandleLcpToCoreRecordingsManagerSpec.send_playback_state</span>
+                <ul>
+                  <li>
+                    which sends <span>PlaybackStateMsg</span> to <span>RecordingsManager</span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            and then sends <span>timestamped StartRecordingMsg</span> to <span>RecordingsManager</span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <span>RecordingsManager</span> receives <span>GlobalStateMsg</span> and calls <span>RecordingsManager.handle_global_state</span>
+        <ul>
+          <li>
+            which creates and stores a new collection of state messages, starting with the <span>GlobalStateMsg</span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <span>RecordingsManager</span> receives any number of <span>LcpStateMsg</span> and calls <span>RecordingsManager.handle_state</span>
+        <ul>
+          <li>
+            which adds the <span>LcpStateMsg</span> to the collection of state messages
+          </li>
+        </ul>
+      </li>
+      <li>
+        <span>RecordingsManager</span> receives <span>PlaybackStateMsg</span> and calls <span>RecordingsManager.handle_playback_state</span>
+        <ul>
+          <li>
+            which adds the <span>PlaybackStateMsg</span> to the collection of state messages
+          </li>
+        </ul>
+      </li>
+      <li>
+        <span>RecordingsManager</span> receives <span>timestamped StartRecordingMsg</span> and calls <span>RecordingsManager.handle_start_recording</span>
+        <ul>
+          <li>
+            which first stops any ongoing recording
+          </li>
+          <li>
+            and then opens a new .tmhm_unsaved file
+          </li>
+          <li>
+            and then calls <span>RecordingsManager.write_unsaved_header</span>
+            <ul>
+              <li>
+                which first writes the TMHM_VERSION_INT (16-bit) to the .tmhm_unsaved file
+              </li>
+              <li>
+                and then writes the <span>timestamped StartRecordingMsg</span> to the .tmhm_unsaved file
+              </li>
+              <li>
+                and then writes the collection of state messages to the .tmhm_unsaved file
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <ul>
+      <li>
+        LCPs (including the playback LCP 0) send various <span>LcpToCore*Msg instance</span> messages to <span>TmhCore</span>
+      </li>
+      <li>
+        Any given instance of these messages is handled by a <span>HandleToCoreSpec subclass</span> instance
+        <ul>
+          <li>
+            which first calls the relevant <span>TmhCore</span> method
+          </li>
+          <li>
+            and then sends <span>timestamped LcpToCore*Msg instance</span> to <span>RecordingsManager</span>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <span>RecordingsManager</span> receives <span>timestamped LcpToCore*Msg instance</span> and calls <span>RecordingsManager</span>'s relevant handle method
+        <ul>
+          <li>
+            which writes the <span>timestamped LcpToCore*Msg instance</span> to the .tmhm_unsaved file
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <ul>
+      <li>
+        An LCP sends 
+      </li>
+    </ul>
+  </li>
+</ul></body>
+
+      <p><p><p>
+        An LCP sends
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg() to
+        TmhCore() This is handled by
+        ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec() which
+        doesn't call a method and then sends
+        ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns, StopRecordingMsg() ) to RecordingsManager()
+        RecordingsManager() receives the timestamped StopRecordingMsg() and so
+        calls RecordingsManager.handle_stop_recording which first writes the
+        message to the file and then closes the file and then calls
+        .save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue=queue)
+        .save_unsaved.try_save_unsaved_recordings for each path in UNSAVED_DIR
+        calls .save_unsaved.try_save_unsaved_recording(unsaved_path,
+        to_recordings_manager_queue=queue)
+        .save_unsaved.try_save_unsaved_recording first reads the file and the
+        other recordings the file references and creates a new .tmhm file and
+        then if successful sends
+        ..tmh_msgs.types.to_recordings_manager.UpdateRecordingsMsg() to
+        to_recordings_manager_queue LCP sends
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StartPlaybackMsg(
+        filename_stem, playback_globals, loop ) to TmhCore() This is handled by
+        ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec() which
+        doesn't call a method and then sends
+        ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StartPlaybackMsg(
+        filename_stem, playback_globals, loop ) ) to RecordingsManager()
+        RecordingsManager() receives the timestamped StartPlaybackMsg() and so
+        calls RecordingsManager.handle_start_playback which first calls
+        RecordingsManager._try_stop_playback which may be documented in the next
+        bit and then does some stuff to load and buffer the playback file +...
+        and then calls RecordingsManager._try_write_msg_to_file LCP sends
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopPlaybackMsg() to
+        TmhCore() This is handled by
+        ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec() which
+        doesn't call a method and then sends
+        ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
+        timestamp_ns,
+        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopPlaybackMsg() ) to
+        RecordingsManager() RecordingsManager() receives the timestamped
+        StopPlaybackMsg() and so calls RecordingsManager.handle_stop_playback
+        which first calls RecordingsManager._try_stop_playback which +... and
+        then calls RecordingsManager._try_write_msg_to_file TO DO: when do
+        messages start recording? recrding manager receives start recording,
+        sends back another msg, then core sends the state as acknowledgement
+        that all future messages will be recorded, so that start_msg_i is
+        correct, OR maybe msgs record immediately but only get time-corrected
+        after the acknowledgement?
+
+</html>

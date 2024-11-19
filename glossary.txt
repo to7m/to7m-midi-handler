@@ -1,0 +1,58 @@
+HNRC
+    Hardware Notes Range Component.
+    Describes a range of notes, usually on a physical controller. Every playable note component should be part of exactly one HNRC. Within an HNRC, note components should be consecutive, and all on the same hardware device. No two note components within a given HNRC should have the same midi note value.
+    Each HNRC has a VEL CURVE.
+    This is a low-level concept and should only be relevant when defining controllers profiles.
+
+LCP
+    Loaded controllers profile.
+    An object that represents any number of physical or GUI interface controllers.
+
+LSMP
+    Loaded sound modules profile.
+    An object that represents any number of physical or virtual sound modules.
+
+PNRC
+    Patch Notes Range Component.
+    Describes a range of notes comprised of one or more SNRCs. Each SNRC within a given PNRC should be from a different HNRC.
+    Each patch is controlled by exactly 1 PNRC.
+    Every PNRC should be explicitly registered and deregistered.
+
+PSLOT
+    Patches Slot.
+    Analagous to a MIDI channel.
+    Each LCP has any number of PSLOTs.
+
+SNRC
+    Sub Notes Range Component.
+    Describes a range of notes contained within 1 HNRC and 1 PNRC. SNRCs may overlap with each other. Within an SNRC, note components should be consecutive.
+    Each SNRC has a transposition.
+    When something references both an HNRC and a PNRC, it is probably referencing the SNRC that exists in both the HNRC and PNRC.
+
+TMH MSG
+    to7m-midi-handler message.
+    An alternative to MIDI message.
+
+TMHM
+    to7m-midi-handler messages.
+    Describes the file format for recordings consisting of TMH MSGs, using the ‘.tmhm’ extension.
+
+TRUE VEL
+    True Velocity.
+    A float (or numpy.float32) describing the intended loudness of a note, used only internally in to7m-midi-handler and in TMHM files.
+    Values can be either 0.0, or in the range 1.0 <= x <= 10.0, where:
+        0.0 is n (if possible, otherwise pppp)
+        1.0 is pppp
+        2.0 is ppp
+        3.0 is pp
+        4.0 is p
+        5.0 is mp
+        6.0 is mf
+        7.0 is f
+        8.0 is ff
+        9.0 is fff
+        10.0 is ffff
+
+VEL CURVE
+    Velocity Curve.
+    A callable which converts either converts a controller's raw note velocities into TRUE VELs, or converts TRUE VELs into raw note velocities for a sound module to use.

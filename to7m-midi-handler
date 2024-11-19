@@ -1,0 +1,7 @@
+#!/bin/relative-path .venv_for_python3.9.17/bin/python
+
+
+from src import run_tmh
+
+
+run_tmh()
