@@ -64,8 +64,12 @@
             "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(filename_stem: str, include_globals: bool))",
         "timestamped StopRecordingMsg":
             "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg())",
+        "try_save_unsaved_recording":
+            "tmh_msgs.save_unsaved.try_save_unsaved_recording(unsaved_path: pathlib.Path)",
         "try_save_unsaved_recordings":
-            "tmh_msgs.save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue=queue)"
+            "tmh_msgs.save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue: queue.Queue)",
+        "UpdateRecordingsMsg":
+            "tmh_msgs.types.to_recordings_manager.UpdateRecordingsMsg()"
     };
 
     function add_span_titles() {
@@ -218,6 +222,25 @@
           </li>
           <li>
             and then calls <span>try_save_unsaved_recordings</span>
+            <ul>
+              <li>
+                which calls <span>try_save_unsaved_recording</span> for each path in <span>/recordings/unsaved/</span>
+                <ul>
+                  <li>
+                    which for each given path first reads the unsaved recording
+                  </li>
+                  <li>
+                    then reads any saved recordings the unsaved recording references
+                  </li>
+                  <li>
+                    then creates a new <span>/recordings/saved/*.tmhm</span> file
+                  <li>
+                </ul>
+              </li>
+              <li>
+                then, if any of those calls result in new saved recordings, sends <span>UpdateRecordingsMsg</span> to <span>RecordingsManager<span>
+              </li>
+            </ul>
           </li>
         </ul>
       </li>
@@ -225,16 +248,7 @@
   </li>
 </ul></body>
 
-      <p><p><p>
-        
-        .save_unsaved.try_save_unsaved_recordings for each path in UNSAVED_DIR
-        calls .save_unsaved.try_save_unsaved_recording(unsaved_path,
-        to_recordings_manager_queue=queue)
-        .save_unsaved.try_save_unsaved_recording first reads the file and the
-        other recordings the file references and creates a new .tmhm file and
-        then if successful sends
-        ..tmh_msgs.types.to_recordings_manager.UpdateRecordingsMsg() to
-        to_recordings_manager_queue LCP sends
+      <p><p><p>LCP sends
         ..tmh_msgs.types.lcp_to_core_recordings_manager.StartPlaybackMsg(
         filename_stem, playback_globals, loop ) to TmhCore() This is handled by
         ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec() which
