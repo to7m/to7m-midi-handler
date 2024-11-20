@@ -56,10 +56,14 @@
             "tmh_msgs.types.to_recordings_manager.PlaybackStateMsg(filename_stem: str, next_msg_i: int, playback_is_looped: bool)",
         "StartRecordingMsg":
             "tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(filename_stem: str, include_globals: bool)",
+        "StopRecordingMsg":
+            "tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg()",
         "timestamped LcpToCore*Msg instance":
             "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCore*Msg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_*.*Msg(*))",
         "timestamped StartRecordingMsg":
             "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(filename_stem: str, include_globals: bool))",
+        "timestamped StopRecordingMsg":
+            "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg())"
     };
 
     function add_span_titles() {
@@ -189,23 +193,32 @@
   <li>
     <ul>
       <li>
-        An LCP sends 
+        An LCP sends <span>StopRecordingMsg</span> to <span>TmhCore</span>
+      </li>
+      <li>
+        This is handled by <span>HandleLcpToCoreRecordingsManagerSpec</span>
+        <ul>
+          <li>
+            which doesn't call a method
+          </li>
+          <li>
+            and then sends <span>timestamped StopRecordingMsg</span> to <span>RecordingsManager</span>
+        </ul>
+      </li>
+      <li>
+        <span>RecordingsManager</span> receives the <span>timestamped StopRecordingMsg</span> and calls <span>RecordingsManager.handle_stop_recording</span>
+        <ul>
+          <li>
+            which first writes the message to the file
+          </li>
+        </ul>
       </li>
     </ul>
   </li>
 </ul></body>
 
       <p><p><p>
-        An LCP sends
-        ..tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg() to
-        TmhCore() This is handled by
-        ..tmh_msgs.handlers.to_core.HandleLcpToCoreRecordingsManagerSpec() which
-        doesn't call a method and then sends
-        ..tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(
-        timestamp_ns, StopRecordingMsg() ) to RecordingsManager()
-        RecordingsManager() receives the timestamped StopRecordingMsg() and so
-        calls RecordingsManager.handle_stop_recording which first writes the
-        message to the file and then closes the file and then calls
+        and then closes the file and then calls
         .save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue=queue)
         .save_unsaved.try_save_unsaved_recordings for each path in UNSAVED_DIR
         calls .save_unsaved.try_save_unsaved_recording(unsaved_path,
