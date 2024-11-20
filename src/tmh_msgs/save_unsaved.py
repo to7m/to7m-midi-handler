@@ -33,11 +33,12 @@ def try_save_unsaved_recording(unsaved_path):
     lcp_msgs = list(_fix_pslot_indices(lcp_msgs, last_timestamp_ns))
 
 
-def try_save_unsaved_recordings():
+def try_save_unsaved_recordings(to_recordings_manager_queue):
     if UNSAVED_DIR.exists():
         for path in sorted(unsaved_dir.iterdir()):
             try_save_unsaved_recording(path)
 
+    +...
 
 
 

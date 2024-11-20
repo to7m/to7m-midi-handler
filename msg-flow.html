@@ -63,7 +63,9 @@
         "timestamped StartRecordingMsg":
             "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StartRecordingMsg(filename_stem: str, include_globals: bool))",
         "timestamped StopRecordingMsg":
-            "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg())"
+            "tmh_msgs.types.to_recordings_manager.TimestampedLcpToCoreRecordingsManagerMsg(timestamp_ns: int, tmh_msgs.types.lcp_to_core_recordings_manager.StopRecordingMsg())",
+        "try_save_unsaved_recordings":
+            "tmh_msgs.save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue=queue)"
     };
 
     function add_span_titles() {
@@ -209,7 +211,13 @@
         <span>RecordingsManager</span> receives the <span>timestamped StopRecordingMsg</span> and calls <span>RecordingsManager.handle_stop_recording</span>
         <ul>
           <li>
-            which first writes the message to the file
+            which first writes the <span>timestamped StopRecordingMsg</span> to the file
+          </li>
+          <li>
+            and then closes the file
+          </li>
+          <li>
+            and then calls <span>try_save_unsaved_recordings</span>
           </li>
         </ul>
       </li>
@@ -218,8 +226,7 @@
 </ul></body>
 
       <p><p><p>
-        and then closes the file and then calls
-        .save_unsaved.try_save_unsaved_recordings(to_recordings_manager_queue=queue)
+        
         .save_unsaved.try_save_unsaved_recordings for each path in UNSAVED_DIR
         calls .save_unsaved.try_save_unsaved_recording(unsaved_path,
         to_recordings_manager_queue=queue)
