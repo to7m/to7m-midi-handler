@@ -1,7 +1,7 @@
 from .to_core import new_msg_type, RecordingsManagerToCoreMsg
 
 
-FilenameStemsMsg
+FilenameStemsForCoreMsg
 
 #pROBABLY not needed
 """
