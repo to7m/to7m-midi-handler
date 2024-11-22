@@ -1,5 +1,5 @@
 from ..logging import log_err
-from .constants import RECORDINGS_DIR, UNSAVED_DIR
+from .constants import UNSAVED_DIR, SAVED_DIR
 from .types import (
     TimestampedLcpToCoreGlobalMsg,
     TimestampedLcpToCorePslotMsg,
