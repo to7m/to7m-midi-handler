@@ -14,7 +14,7 @@ def try_save_unsaved_recording(
 ):
     with unsaved_path.open('rb') as f:
         read_and_check_version(f)
-        state_msgs = read_state_msgs(f)
+        state_msgs = list(read_state_msgs(f))
         timestamped_msgs = list(read_timestamped_msgs(f))
 
     segments = _split_by_playback_msgs(raw_msgs)

@@ -1,5 +1,8 @@
 from .constants import TMHM_VERSION_INT
-from .types import LcpsToCoreGlobalMsg, LcpToCoreMsg
+from .types import (
+    PlaybackStateMsg,
+    ToRecordingsManagerMsg
+)
 
 
 def read_and_check_version(path, f):
@@ -14,7 +17,13 @@ def read_and_check_version(path, f):
 
 
 def read_state_msgs(f):
-    +...StateMsg.read_from_file(f)
+    while True:
+        state_msg = ToRecordingsManagerMsg.read_from_file(f)
+
+        yield state_msg
+
+        if type(state_msg) is PlaybackStateMsg:
+            return
 
 
 def read_timestamped_msgs(f):
