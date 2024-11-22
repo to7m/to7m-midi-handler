@@ -13,6 +13,10 @@ def read_and_check_version(path, file):
         )
 
 
+def read_state_msgs(file):
+    +...StateMsg.read_from_file(f)
+
+
 def read_timestamped_msgs(file):
     try:
         while True:
