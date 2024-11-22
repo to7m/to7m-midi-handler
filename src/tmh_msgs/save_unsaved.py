@@ -9,7 +9,7 @@ from ._read_write import (
 
 
 @log_exceptions
-def try_save_unsaved_recording(unsaved_path):
+def try_save_unsaved_recording(unsaved_path, to_recordings_manager_queue):
     with unsaved_path.open('rb') as f:
         read_and_check_version(f)
         state_msg = StateMsg.read_from_file(f)
@@ -32,7 +32,7 @@ def try_save_unsaved_recording(unsaved_path):
     return +bool
 
 
-def try_save_unsaved_recordings(to_recordings_manager_queue=None):
+def try_save_unsaved_recordings(to_recordings_manager_queue):
     if UNSAVED_DIR.exists():
         new_saved_recordings = False
 
