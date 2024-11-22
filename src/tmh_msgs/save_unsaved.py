@@ -4,7 +4,7 @@ from .types import (
     UpdateRecordingsMsg
 )
 from ._read_write import (
-    read_state_msgs, read_and_check_version
+    read_and_check_version, read_state_msgs, read_timestamped_msgs
 )
 
 
@@ -17,6 +17,7 @@ def try_save_unsaved_recording(
         state_msgs = list(read_state_msgs(f))
         timestamped_msgs = list(read_timestamped_msgs(f))
 
+    +...
     segments = _split_by_playback_msgs(raw_msgs)
 
 

@@ -18,7 +18,7 @@ def read_and_check_version(path, f):
 
 def read_state_msgs(f):
     while True:
-        state_msg = ToRecordingsManagerMsg.read_from_file(f)
+        state_msg = ToRecordingsManagerMsg.read_from_file(f).nested
 
         yield state_msg
 
@@ -29,7 +29,7 @@ def read_state_msgs(f):
 def read_timestamped_msgs(f):
     try:
         while True:
-            yield TimestampedMsg.read_from_file(f).nested
+            yield ToRecordingsManagerMsg.read_from_file(f).nested
     except Exception as err:
         # tmp until we know what error end of file causes
         print(err)
