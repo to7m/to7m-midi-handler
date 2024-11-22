@@ -1,4 +1,4 @@
-from ..logging import log_err
+from ..logging import log_exceptions
 from .constants import UNSAVED_DIR, SAVED_DIR
 from .types import (
     UpdateRecordingsMsg
@@ -9,7 +9,9 @@ from ._read_write import (
 
 
 @log_exceptions
-def try_save_unsaved_recording(unsaved_path, to_recordings_manager_queue):
+def try_save_unsaved_recording(
+    unsaved_path, to_recordings_manager_queue=None
+):
     with unsaved_path.open('rb') as f:
         read_and_check_version(f)
         state_msg = StateMsg.read_from_file(f)
@@ -32,7 +34,7 @@ def try_save_unsaved_recording(unsaved_path, to_recordings_manager_queue):
     return +bool
 
 
-def try_save_unsaved_recordings(to_recordings_manager_queue):
+def try_save_unsaved_recordings(to_recordings_manager_queue=None):
     if UNSAVED_DIR.exists():
         new_saved_recordings = False
 
