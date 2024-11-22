@@ -1,13 +1,10 @@
 from ..logging import log_err
 from .constants import UNSAVED_DIR, SAVED_DIR
 from .types import (
-    TimestampedLcpToCoreGlobalMsg,
-    TimestampedLcpToCorePslotMsg,
-    TimestampedLcp0ToCorePslotMsg,
-    StateMsg
+    UpdateRecordingsMsg
 )
 from ._read_write import (
-    read_and_check_version, read_timestamped_msgs, write_msgs
+    read_and_check_version
 )
 
 
@@ -32,14 +29,18 @@ def try_save_unsaved_recording(unsaved_path):
     lcp_msgs = list(_address_hanging_playbacks(lcp_msgs, playback_infos))
     lcp_msgs = list(_fix_pslot_indices(lcp_msgs, last_timestamp_ns))
 
+    return +bool
 
-def try_save_unsaved_recordings(to_recordings_manager_queue):
+
+def try_save_unsaved_recordings(to_recordings_manager_queue=None):
     if UNSAVED_DIR.exists():
+        new_saved_recordings = False
+
         for path in sorted(unsaved_dir.iterdir()):
-            try_save_unsaved_recording(path)
+            new_saved_recordings |= try_save_unsaved_recording(path)
 
-    +...
-
+        if new_saved_recordings and to_recordings_manager_queue:
+            to_recordings_manager_queue.put(UpdateRecordingsMsg())
 
 
 
