@@ -3,7 +3,7 @@ from .types import LcpsToCoreGlobalMsg, LcpToCoreMsg
 
 
 def read_and_check_version(path, file):
-    tmhm_version_int = int.from_bytes(file.read(8))
+    tmhm_version_int = int.from_bytes(file.read(2))
 
     if tmhm_version_int != TMHM_VERSION_INT:
         raise Exception(
