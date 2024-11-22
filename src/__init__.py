@@ -1,7 +1,7 @@
 # submodule import order:
 #   logging
-#   to7m_exec
 #   to7m_aconnect
+#   to7m_exec
 #   recursively_bindable
 #   tmh_msgs
 #   curves
