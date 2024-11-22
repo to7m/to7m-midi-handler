@@ -2,8 +2,8 @@ from .constants import TMHM_VERSION_INT
 from .types import LcpsToCoreGlobalMsg, LcpToCoreMsg
 
 
-def read_and_check_version(path, file):
-    tmhm_version_int = int.from_bytes(file.read(2))
+def read_and_check_version(path, f):
+    tmhm_version_int = int.from_bytes(f.read(2))
 
     if tmhm_version_int != TMHM_VERSION_INT:
         raise Exception(
@@ -13,11 +13,11 @@ def read_and_check_version(path, file):
         )
 
 
-def read_state_msgs(file):
+def read_state_msgs(f):
     +...StateMsg.read_from_file(f)
 
 
-def read_timestamped_msgs(file):
+def read_timestamped_msgs(f):
     try:
         while True:
             yield TimestampedMsg.read_from_file(f).nested
@@ -27,8 +27,8 @@ def read_timestamped_msgs(file):
         raise
 
 
-def write_msg(file, msg):
-    msg.write_to_file(file)
+def write_msg(f, msg):
+    msg.write_to_file(f)
 
 
 def write_msgs(path, msgs):
